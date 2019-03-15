@@ -38,6 +38,7 @@ def digital_Write():
 	GPIO.output(latchpin,GPIO.LOW)
 	clock()
 	GPIO.output(latchpin,GPIO.HIGH)
+	clock()
 
 def set_bit(bit):
 	if ( bit == 0):
@@ -56,4 +57,11 @@ def shiftout(index):
 		clock()
 	digital_Write()
 
-	
+def main():
+	running=True
+	setup_pins()
+	while running == True:
+		try:
+			
+
+shiftout()
