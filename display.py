@@ -34,10 +34,16 @@ def clock():
 	GPIO.output(clockpin,GPIO.HIGH)
 	time.sleep(pauseclock)
 
-def clear():
+def digital_Write():
 	GPIO.output(latchpin,GPIO.LOW)
 	clock()
 	GPIO.output(latchpin,GPIO.HIGH)
+
+def set_bit(bit):
+	if ( bit == 0):
+		GPIO.output(datapin, GPIO.LOW)
+	else:
+		GPIO.output(datapin, GPIO.HIGH)
 
 def get_binlist_from_digit(num):
 	magic = lambda num: map(int, str(num))
@@ -46,12 +52,8 @@ def get_binlist_from_digit(num):
 def shiftout(index):
 	digit = get_binlist_from_digit(bits[index])
 	for bit in digit:
-		if (bit == 1):
-			GPIO.output(datapin, GPIO.HIGH)
-		GPIO.output(clockpin, GPIO.HIGH)
-		time.sleep(pauseclock)
-		GPIO.output(clockpin, GPIO.LOW)
-		GPIO.output(datapin, GPIO.LOW)
-	GPIO.output(latchpin, GPIO.HIGH)
-	time.sleep(pauseclock)
-	GPIO.output(latchpin, GPIO.LOW)
+		set_bit(bit)
+		clock()
+	digital_Write()
+
+	
