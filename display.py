@@ -62,6 +62,5 @@ def main():
 	setup_pins()
 	while running == True:
 		try:
-			
 
-shiftout()
+		except:
