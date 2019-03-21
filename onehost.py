@@ -106,7 +106,8 @@ def main():
         bru.when_pressed = set_sumled(1)
       else:
         bs.wait_for_press(timeout=None)
-    except KeyboardInterrupt:
+    except GPIOZeroError:
+      #Set a blink led
       running=False
 
 #Execution
