@@ -18,7 +18,7 @@ clock=OutputDevice(clockpin)
 latch=OutputDevice(latchpin)
 #set local pins for buttons
 leftup=18
-leftdown=4
+leftdown=17
 rightdown=22
 rightup=23
 switch=25
@@ -28,6 +28,10 @@ bld=Button(leftdown,pin_factory=local_factory)  #button left down
 brd=Button(rightdown,pin_factory=local_factory) #button right down
 bru=Button(rightup,pin_factory=local_factory) #button right up
 bs=Button(switch,pin_factory=local_factory)  #switch onoff
+
+#set local status LED
+statusled=16
+leds= LED(statusled,pin_factory=local_factory)
 
 #pausetimes
 pauseclock=0
@@ -43,27 +47,8 @@ leds=[61404, 60996, 61304, 61292, 61156, 61356, 61372, 61252, 61436, 61420, 9180
 #Output defs
 
 def set_sumled(sum):
-    sumled = sumled + (sum)
-    shiftout()
-
-def get_sumled():
-    return sumled
-
-def clocking():
-  clock.on()
-  time.sleep(pauseclock)
-  clock.off()
-  time.sleep(pauseclock)
-
-#def digital_Write():
-#  latch.off()
-#  clocking()
-#  latch.on()
-
-def get_binlist_from_digit(num):
-  magic = lambda num: map(int, str(num))
-
-  return magic
+  sumled = sumled + (sum)
+  shiftout()
 
 def shiftout():
   digit = get_binlist_from_digit(leds[get_sumled()])
@@ -78,21 +63,39 @@ def shiftout():
   clocking()
   latch.on()
 
-def get_input():
-  tmpled=sumled
-  if bs.is_pressed:
-    if blu.is_pressed:
-      tmpled = sumled+10
-    elif bld.is_pressed:
-      tmpled = sumled-10
-    elif brd.is_pressed:
-      tmpled = sumled-1
-    elif bru.is_pressed:
-      tmpled = sumled+1
-    if tmpled != sumled:
-      shiftout(tmpled)
-  else:
-    bs.wait_for_press(timeout=None)
+def get_binlist_from_digit(num):
+  magic = lambda num: map(int, str(num))
+  return magic
+
+def get_sumled():
+  return sumled
+
+def clocking():
+  clock.on()
+  time.sleep(pauseclock)
+  clock.off()
+  time.sleep(pauseclock)
+
+#def digital_Write():
+#  latch.off()
+#  clocking()
+#  latch.on()
+
+# def get_input():
+#   tmpled=sumled
+#   if bs.is_pressed:
+#     if blu.is_pressed:
+#       tmpled = sumled+10
+#     elif bld.is_pressed:
+#       tmpled = sumled-10
+#     elif brd.is_pressed:
+#       tmpled = sumled-1
+#     elif bru.is_pressed:
+#       tmpled = sumled+1
+#     if tmpled != sumled:
+#       shiftout(tmpled)
+#   else:
+#     bs.wait_for_press(timeout=None)
 
 #main part
 def main():
@@ -105,10 +108,14 @@ def main():
         brd.when_pressed = set_sumled(-1)
         bru.when_pressed = set_sumled(1)
       else:
+        if leds.is_lit == True:
+          leds.off()
+          #turns off leds if its active from before
         bs.wait_for_press(timeout=None)
     except GPIOZeroError:
       #Set a blink led
-      running=False
+      leds.blink()
+      #running=False
 
 #Execution
 if __name__=="__main__":
