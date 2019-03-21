@@ -67,7 +67,7 @@ def get_binlist_from_digit(num):
 
 def shiftout(index):
   digit = get_binlist_from_digit(leds[index])
-  #reversed array would be called list(reverse(digit))
+  #reversed array would be called list(reversed(digit))
   for bit in digit:
     if ( bit == 0 ):
       data.off()
