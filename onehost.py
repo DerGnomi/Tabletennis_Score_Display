@@ -7,7 +7,7 @@ from gpiozero.pins.pigpio import PiGPIOFactory
 #set some vars
 #set local pinboard
 local_factory = PiGPIOFactory()
-#define pins remote 
+#define pins remote
 #for the LED and the LEDShifter
 datapin=17  #datashift
 clockpin=22 #clockshift
@@ -23,11 +23,11 @@ rightdown=22
 rightup=23
 switch=25
 
-blu=Button(18,pull_up=False,pin_factory=local_factory)
-bld=Button(4,pull_up=False,pin_factory=local_factory)
-brd=Button(22,pull_up=False,pin_factory=local_factory)
-bru=Button(23,pull_up=False,pin_factory=local_factory)
-bs=Button(25,pull_up=False,pin_factory=local_factory)
+blu=Button(leftup,pin_factory=local_factory) #button left up
+bld=Button(leftdown,pin_factory=local_factory)  #button left down
+brd=Button(rightdown,pin_factory=local_factory) #button right down
+bru=Button(rightup,pin_factory=local_factory) #button right up
+bs=Button(switch,pin_factory=local_factory)  #switch onoff
 
 #pausetimes
 pauseclock=0
@@ -73,30 +73,31 @@ def shiftout(index):
 
 def get_input():
   tmpled=sumled
-  if bs.is_pressed == False:
-    if blu.is_pressed == True:
+  if bs.is_pressed:
+    if blu.is_pressed:
       tmpled = sumled+10
-    elif bld.is_pressed == True:
+    elif bld.is_pressed:
       tmpled = sumled-10
-    elif brd.is_pressed == True:
+    elif brd.is_pressed:
       tmpled = sumled-1
-    elif bru.is_pressed == True:
+    elif bru.is_pressed:
       tmpled = sumled+1
     if tmpled != sumled:
       shiftout(tmpled)
   else:
-    bs.wait_for_release(timeout=None)
+    bs.wait_for_press(timeout=None)
 
 #main part
 def main():
   running=True
   while running == True:
-    try: 
+    try:
       get_input()
       sleep(pause)
-      print ("PING!")
+      #print ("PING!")
     except KeyboardInterrupt:
       running=False
 
+#Execution
 if __name__=="__main__":
   main()
