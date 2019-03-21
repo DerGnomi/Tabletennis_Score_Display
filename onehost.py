@@ -62,13 +62,18 @@ def set_bit(bit):
 
 def get_binlist_from_digit(num):
   magic = lambda num: map(int, str(num))
+
   return magic
 
 def shiftout(index):
   digit = get_binlist_from_digit(leds[index])
+  #reversed array would be called list(reverse(digit))
   for bit in digit:
-    set_bit(bit)
-    clock()
+    if ( bit == 0 ):
+      data.off()
+    else:
+      data.on()
+    clocking()
   digital_Write()
 
 def get_input():
