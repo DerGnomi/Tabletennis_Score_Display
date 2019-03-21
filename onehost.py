@@ -35,7 +35,6 @@ pause=0.1
 
 #counter
 sumled=0
-tmpled=0
 
 #LED Digi codes
 leds=[61404, 60996, 61304, 61292, 61156, 61356, 61372, 61252, 61436, 61420, 9180, 8772, 9080, 9068, 8932, 9132, 9148, 9028, 9212, 9196, 48604, 48196, 48504, 48492, 48356, 48556, 48572, 48452, 48636, 48620, 47068, 46660, 46968, 46956, 46820, 47020, 47036, 46916, 47100, 47084, 29660, 29252, 29560, 29548, 29412, 29612, 29628, 29508, 29692, 29676, 55260, 54852, 55160, 55148, 55012, 55212, 55228, 55108, 55292, 55276, 57308, 56900, 57208, 57196, 57060, 57260, 57276, 57156, 57340, 57324, 41948, 41540, 41848, 41836, 41700, 41900, 41916, 41796, 41980, 41964, 65500, 65092, 65400, 65388, 65252, 65452, 65468, 65348, 65532, 65516, 63452, 63044, 63352, 63340, 63204, 63404, 63420, 63300, 63484, 63468 ]
@@ -43,30 +42,31 @@ leds=[61404, 60996, 61304, 61292, 61156, 61356, 61372, 61252, 61436, 61420, 9180
 #maincoding
 #Output defs
 
+def set_sumled(sum):
+    sumled = sumled + (sum)
+    shiftout()
+
+def get_sumled():
+    return sumled
+
 def clocking():
   clock.on()
   time.sleep(pauseclock)
   clock.off()
   time.sleep(pauseclock)
 
-def digital_Write():
-  latch.off()
-  clocking()
-  latch.on()
-
-def set_bit(bit):
-  if ( bit == 0 ):
-    data.off()
-  else:
-    data.on()
+#def digital_Write():
+#  latch.off()
+#  clocking()
+#  latch.on()
 
 def get_binlist_from_digit(num):
   magic = lambda num: map(int, str(num))
 
   return magic
 
-def shiftout(index):
-  digit = get_binlist_from_digit(leds[index])
+def shiftout():
+  digit = get_binlist_from_digit(leds[get_sumled()])
   #reversed array would be called list(reversed(digit))
   for bit in digit:
     if ( bit == 0 ):
@@ -74,7 +74,9 @@ def shiftout(index):
     else:
       data.on()
     clocking()
-  digital_Write()
+  latch.off()
+  clocking()
+  latch.on()
 
 def get_input():
   tmpled=sumled
@@ -97,9 +99,13 @@ def main():
   running=True
   while running == True:
     try:
-      get_input()
-      sleep(pause)
-      #print ("PING!")
+      if bs.is_pressed:
+        blu.when_pressed = set_sumled(10)
+        bld.when_pressed = set_sumled(-10)
+        brd.when_pressed = set_sumled(-1)
+        bru.when_pressed = set_sumled(1)
+      else:
+        bs.wait_for_press(timeout=None)
     except KeyboardInterrupt:
       running=False
 
