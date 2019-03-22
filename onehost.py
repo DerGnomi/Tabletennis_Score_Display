@@ -96,7 +96,7 @@ def set_sumled(su):
   sumled += su
   #set sumled to 0 if its lower than 0 and bigger than 99
   #to avoid breaking the board
-  if 0 > sumled > 99:
+  if not ( 0 <= sumled <= 99):
     sumled = 0
   shiftout()
 
