@@ -1,6 +1,12 @@
 # Tabletennis_Score_Display
 
-Controlling of two 7-segment numbers by a shiftregister (74HC595) with a portable Console
+I changed from Arduino IR controlled to a button controlled score display.
+
+My goal was to show the points of each team
+
+Now the Display is controlled by a portable console with 4 Buttons and 1 switch to turn off/on
+
+The Display has two 7-segment digits controled by a shiftregister (74HC595)
 
 ## Getting Started
 
