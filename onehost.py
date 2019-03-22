@@ -80,7 +80,7 @@ def shiftout():
       data.off()
     else:
       data.on()
-    if not offset == 16:
+    if not (offset == 16):
       clocking()
   #shifting is one too far | maybe after the latch is closed
   #another bit is shifted with the gate opening
