@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-
+#import modules
 from time import sleep
 from gpiozero import *
 from gpiozero.pins.pigpio import PiGPIOFactory
-#import gpiozero.SPI as spi
+
 #set some vars
 #set local pinboard
 local_factory = PiGPIOFactory()
@@ -37,10 +37,8 @@ bs=Button(switch,pin_factory=local_factory)  #switch onoff
 statusled=16
 ledstatus=LED(statusled,pin_factory=local_factory)
 led_status_r=LED(statusled,pin_factory=remote_factory)
-#pausetimes
-pauseclock=0
-pause=0.1
-
+#debugging
+db=True
 #counter
 sumled=0
 
@@ -65,10 +63,11 @@ def shiftout():
   offset = 16-b_len
   #debug output
   #can be delete or commented
-  print (get_sumled())
-  print b_len
-  print digit
-  print b_digit
+  if db == True:
+    print (get_sumled())
+    print b_len
+    print digit
+    print b_digit
   #prepare to shift data into register
   data.off()
   latch.on()
@@ -81,7 +80,7 @@ def shiftout():
       data.off()
     else:
       data.on()
-    if offset != 16:
+    if not offset == 16:
       clocking()
   #shifting is one too far | maybe after the latch is closed
   #another bit is shifted with the gate opening
@@ -91,9 +90,13 @@ def shiftout():
 
 def set_sumled(su):
   #debug output
-  print ("Set new state")
+  if db == True:
+    print ("Set new state")
   global sumled
-  sumled += su
+  if not su == 404:
+    sumled += su
+  else:
+    sumled = 0
   #set sumled to 0 if its lower than 0 and bigger than 99
   #to avoid breaking the board
   if not ( 0 <= sumled <= 99):
@@ -105,9 +108,9 @@ def get_sumled():
 
 def clocking():
   clock.on()
-  sleep(pauseclock)
+  sleep(0)
   clock.off()
-  sleep(pauseclock)
+  sleep(0)
 
 #main part
 def main():
@@ -129,11 +132,13 @@ def main():
             set_sumled(-1)
           if not bru.is_pressed:
             set_sumled(1)
-          print("run")
+          if db == True:
+            print("run")
           sleep(0.5)
         else:
           ledstatus.on()
-          print("no")
+          if db == True:
+            print("no")
           bs.wait_for_press(timeout=None)
       if not bs.is_pressed:
           ledstatus.off()
