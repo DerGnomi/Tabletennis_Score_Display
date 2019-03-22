@@ -1,27 +1,28 @@
 #!/usr/bin/env python
 
 from time import sleep
-from gpiozero import Button, OutputDevice
+from gpiozero import *
 from gpiozero.pins.pigpio import PiGPIOFactory
-
+#import gpiozero.SPI as spi
 #set some vars
 #set local pinboard
 local_factory = PiGPIOFactory()
+remote_factory = PiGPIOFactory(host='192.168.2.40')
 #define pins remote
 #for the LED and the LEDShifter
 datapin=17  #datashift
 clockpin=22 #clockshift
 latchpin=18 #shifting
 
-data=OutputDevice(datapin)
-clock=OutputDevice(clockpin)
-latch=OutputDevice(latchpin)
+data=OutputDevice(datapin,pin_factory=remote_factory)
+clock=OutputDevice(clockpin,pin_factory=remote_factory)
+latch=OutputDevice(latchpin,pin_factory=remote_factory)
 #set local pins for buttons
-leftup=18
-leftdown=17
-rightdown=22
-rightup=23
-switch=25
+leftup=17
+leftdown=18
+rightdown=23
+rightup=22
+switch=26
 
 blu=Button(leftup,pin_factory=local_factory) #button left up
 bld=Button(leftdown,pin_factory=local_factory)  #button left down
@@ -31,8 +32,8 @@ bs=Button(switch,pin_factory=local_factory)  #switch onoff
 
 #set local status LED
 statusled=16
-leds= LED(statusled,pin_factory=local_factory)
-
+ledstatus=LED(statusled,pin_factory=local_factory)
+led_status_r=LED(statusled,pin_factory=remote_factory)
 #pausetimes
 pauseclock=0
 pause=0.1
@@ -46,75 +47,86 @@ leds=[61404, 60996, 61304, 61292, 61156, 61356, 61372, 61252, 61436, 61420, 9180
 #maincoding
 #Output defs
 
-def set_sumled(sum):
-  sumled = sumled + (sum)
-  shiftout()
-
 def shiftout():
-  digit = get_binlist_from_digit(leds[get_sumled()])
-  #reversed array would be called list(reversed(digit))
-  for bit in digit:
-    if ( bit == 0 ):
+  print (get_sumled())
+  led_status_r.on()
+  digit = int(leds[get_sumled()])
+  print digit
+  b_digit = bin(digit)[2:]
+  print (b_digit)
+  b_len = len(b_digit) 
+  print (b_len)
+  data.off()
+  offset=16-b_len
+  latch.on()
+  if offset > 0:
+    for i in range(offset):
+      clocking()
+  for bit in b_digit:
+    if ( int(bit) == 0 ):
       data.off()
     else:
       data.on()
     clocking()
+  #shifting is one too far
   latch.off()
   clocking()
-  latch.on()
+  led_status_r.off()
 
-def get_binlist_from_digit(num):
-  magic = lambda num: map(int, str(num))
-  return magic
+def reversed( y, num_bits ):
+  x = bin(y)[2:]  
+  answer = 0
+  for i in range( num_bits ):                   # for each bit number
+    if (x & (1 << i)):                        # if it matches that bit
+      answer |= (1 << (num_bits - 1 - i))   # set the "opposite" bit in answer
+  return answer
+
+def set_sumled(su):
+  print ("Set new state")
+  global sumled 
+  sumled += su
+  shiftout()
 
 def get_sumled():
   return sumled
 
 def clocking():
   clock.on()
-  time.sleep(pauseclock)
+  sleep(pauseclock)
   clock.off()
-  time.sleep(pauseclock)
+  sleep(pauseclock)
 
 #def digital_Write():
 #  latch.off()
 #  clocking()
 #  latch.on()
 
-# def get_input():
-#   tmpled=sumled
-#   if bs.is_pressed:
-#     if blu.is_pressed:
-#       tmpled = sumled+10
-#     elif bld.is_pressed:
-#       tmpled = sumled-10
-#     elif brd.is_pressed:
-#       tmpled = sumled-1
-#     elif bru.is_pressed:
-#       tmpled = sumled+1
-#     if tmpled != sumled:
-#       shiftout(tmpled)
-#   else:
-#     bs.wait_for_press(timeout=None)
-
 #main part
 def main():
   running=True
+  shiftout()
   while running == True:
     try:
       if bs.is_pressed:
-        blu.when_pressed = set_sumled(10)
-        bld.when_pressed = set_sumled(-10)
-        brd.when_pressed = set_sumled(-1)
-        bru.when_pressed = set_sumled(1)
+        if ledstatus.is_lit:
+          ledstatus.off()
+        if not blu.is_pressed:
+          set_sumled(10)
+        if not bld.is_pressed:
+          set_sumled(-10)
+        if  not brd.is_pressed:
+          set_sumled(-1)
+        if not bru.is_pressed:
+          set_sumled(1)
+        print("run")
+        sleep(0.5)
       else:
-        if leds.is_lit == True:
-          leds.off()
-          #turns off leds if its active from before
+        ledstatus.on()
+        print("no")
         bs.wait_for_press(timeout=None)
     except GPIOZeroError:
       #Set a blink led
-      leds.blink()
+      ledstatus.blink()
       #running=False
 
 #Execution
