@@ -138,8 +138,8 @@ def set_sumled(su):
         sumled += 1
     elif not sumled == 9:
       sumled += 1
-  elif su == (-1):
-    if sumled > 9:
+  elif su == -1:
+    if sumled >= 10:
       if not str(sumled)[-1] == 0:
        sumled = sumled - 1
     else:
@@ -147,8 +147,8 @@ def set_sumled(su):
   elif su == 10:
     if not sumled >= 90:
       sumled = sumled + 10
-  elif su == (-10):
-    if not sumled < 10:
+  elif su == -10:
+    if not sumled <= 9:
       sumled = sumled - 10
   else:
     sumled = 0
