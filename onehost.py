@@ -198,7 +198,7 @@ def main():
             set_sumled(1)
           if db == True:
             print("run")
-          sleep(0.5)
+          sleep(0.3)
         else:
           ledstatus.on()
           if db == True:
