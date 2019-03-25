@@ -5,89 +5,127 @@ from gpiozero import *
 from gpiozero.pins.pigpio import PiGPIOFactory
 
 #set some vars
-#set local pinboard
+#define local pinboard
 local_factory = PiGPIOFactory()
+#define remote pinoboard
 remote_factory = PiGPIOFactory(host='192.168.2.40')
-#define pins remote
-#for the LED and the LEDShifter
-datapin=17  #datashift
-clockpin=22 #clockshift
-latchpin=18 #shifting
 
+###############
+# REMOTE PINS #
+###############
+
+#PINs defined
+datapin=17  #datashift  pin
+clockpin=22 #clockshift pin
+latchpin=18 #shifting   pin
+#Outputdevice define with the previous defined pins
 data=OutputDevice(datapin,pin_factory=remote_factory)
 clock=OutputDevice(clockpin,pin_factory=remote_factory)
 latch=OutputDevice(latchpin,pin_factory=remote_factory)
-#set local pins for buttons
-leftup=17
-leftdown=18
-rightdown=23
-rightup=22
-switch=26
 
-#test the buttons later with
-# pull_up=False
-# and delete "not" in main()
-blu=Button(leftup,pin_factory=local_factory) #button left up
+##############
+# LOCAL PINS #
+##############
+
+#PINs defiend
+leftup=17     #Left side one up     pin
+leftdown=18   #Left side one down   pin
+rightdown=23  #Right side one down  pin
+rightup=22    #Right side one up    pin
+switch=26     #switch on/off        switch
+#Inputdevices (Button and switch) defined with the previous defiend pins
+blu=Button(leftup,pin_factory=local_factory)    #button left up
 bld=Button(leftdown,pin_factory=local_factory)  #button left down
 brd=Button(rightdown,pin_factory=local_factory) #button right down
-bru=Button(rightup,pin_factory=local_factory) #button right up
-bs=Button(switch,pin_factory=local_factory)  #switch onoff
-
+bru=Button(rightup,pin_factory=local_factory)   #button right up
+bs=Button(switch,pin_factory=local_factory)     #switch onoff
 #set local status LED
-statusled=16
+statusled=16  #debug status LED
 ledstatus=LED(statusled,pin_factory=local_factory)
-led_status_r=LED(statusled,pin_factory=remote_factory)
-#debugging
+
+#############
+# DEBUGGING #
+#############
+
 db=True
-#counter
+
+###########
+# COUNTER #
+###########
+
 sumled=0
 
-#LED Digi codes
+#############
+# LED CODES #
+#############
+
+#the index represents the number which will be displayed
+#so the array is 100 numbers long
 leds=[61404, 60996, 61304, 61292, 61156, 61356, 61372, 61252, 61436, 61420, 9180, 8772, 9080, 9068, 8932, 9132, 9148, 9028, 9212, 9196, 48604, 48196, 48504, 48492, 48356, 48556, 48572, 48452, 48636, 48620, 47068, 46660, 46968, 46956, 46820, 47020, 47036, 46916, 47100, 47084, 29660, 29252, 29560, 29548, 29412, 29612, 29628, 29508, 29692, 29676, 55260, 54852, 55160, 55148, 55012, 55212, 55228, 55108, 55292, 55276, 57308, 56900, 57208, 57196, 57060, 57260, 57276, 57156, 57340, 57324, 41948, 41540, 41848, 41836, 41700, 41900, 41916, 41796, 41980, 41964, 65500, 65092, 65400, 65388, 65252, 65452, 65468, 65348, 65532, 65516, 63452, 63044, 63352, 63340, 63204, 63404, 63420, 63300, 63484, 63468 ]
 
-#maincoding
-#Output defs
+############
+### CODE ###
+############
 
 def shiftout():
-  led_status_r.on()
-  #status led indicates the shift for debug
-  #set some vars
+  #set the latch to off to save the input
+  latch.off()
+  ########
+  # VARS #
+  ########
   #get the decimal from leds array
   digit = int(leds[get_sumled()])
-  #convert the decimal to binary
+  #convert the decimal to binary and reverse it
   #strip of the first two binary indicator bits (0b)
-  b_digit = bin(digit)[2:]
+  b_digit = bin(digit)[2:][::-1]
+  #get the int from the reversed binary number
+  i_digit = int(b_digit, 2)
   #read the length of the bitstring
-  b_len = len(b_digit)
-  #set how much bits are missing to get the full 16bit length
-  offset = 16-b_len
+  i_len = len(bin(i_digit)[2:])
+  #if 2 is at the end of the number, the last bit must be 0 but will be stripped of
+  #because it is at the beginning of the bitstring and will be stripped by convert it 
+  #back to int from binary
+  if get_sumled() == 2 or get_sumled() == 12 or get_sumled() == 22 or get_sumled() == 32 or get_sumled() == 42 or get_sumled() == 52 or get_sumled() == 62 or get_sumled() == 72 or get_sumled() == 82 or get_sumled() == 92:
+    i_len += 1
+  #if the string is shorter than 14 bits it must be filled with 0 at the end
+  #will also be dropped in the first step by convert from int to bit  
+  if 14-i_len != 0:
+    for i in range(14-i_len):
+      s = b_digit + '0'
+      b_digit = s
+    i_digit = int(b_digit, 2)
+    i_len = len(bin(i_digit)[2:])
   #debug output
-  #can be delete or commented
+  #can be delete or commented if it is in production
   if db == True:
-    print (get_sumled())
-    print b_len
-    print digit
-    print b_digit
+    print (get_sumled(), i_len, digit, b_digit, i_digit)
   #prepare to shift data into register
-  data.off()
-  latch.on()
-  if offset > 0:
-    for i in range(offset):
-      clocking()
-  for bit in b_digit:
-    offset += 1
-    if ( int(bit) == 0 ):
+  for i in range(16):
+    #checking bit by bit if the current bit is 1 or 0 and outputs its weight
+    bit=(0b1000000000000000>>i)&i_digit
+    if bit == 0:
+      if db == True:
+        #debugg output
+        print (bit)
+      #if bit is 0 than set datapin to off
       data.off()
     else:
+      if db == True:
+        #debug output
+        print (bit)
+      #if bit is >0 set datapin to on
       data.on()
-    if not (offset == 16):
-      clocking()
-  #shifting is one too far | maybe after the latch is closed
-  #another bit is shifted with the gate opening
-  latch.off()
-  clocking()
-  led_status_r.off()
+    #clock to shift the bit into the register
+    clocking()
+  #when all bits are in the register unlock it with latch.on
+  latch.on()
+  #clock just on on, without clocking to prevent 1 bit getting shifted
+  #with the clock into the register
+  clock.on()
 
+##############
+# SETTER SUM #
+##############
 def set_sumled(su):
   #debug output
   if db == True:
@@ -103,16 +141,24 @@ def set_sumled(su):
     sumled = 0
   shiftout()
 
+##############
+# GETTER SUM #
+##############
 def get_sumled():
   return sumled
 
+#############
+# THE CLOCK #
+#############
 def clocking():
   clock.on()
   sleep(0)
   clock.off()
   sleep(0)
 
-#main part
+########
+# MAIN #
+########
 def main():
   running=True
   error=False
@@ -139,7 +185,7 @@ def main():
           ledstatus.on()
           if db == True:
             print("no")
-          bs.wait_for_press(timeout=None)
+            bs.wait_for_press(timeout=None)
       if not bs.is_pressed:
           ledstatus.off()
           set_sumled(404) #reset the board
