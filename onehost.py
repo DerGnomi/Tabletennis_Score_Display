@@ -132,6 +132,13 @@ def set_sumled(su):
     print ("Set new state")
   #import the global var to set it
   global sumled
+  #To not change value from other team changing the value from the lower weight digit
+  #it is permitted to rise it higher than 9
+  #or lower it more than 0
+  #the higher weight digit can not be raised higher than 90
+  #and lower decreased than 0x (x for any other digit)
+  #the value must be converted to str to strip of the first digit
+  #and than back to int to compare it again
   if su == 1:
     if sumled > 18:
       if not int(str(sumled)[-1:]) == 9:
@@ -152,7 +159,6 @@ def set_sumled(su):
       sumled = sumled - 10
   else:
     sumled = 0
-  #sumled += su
   #set sumled to 0 if its lower than 0 and bigger than 99
   #to avoid breaking the board
   if not ( 0 <= sumled <= 99):
