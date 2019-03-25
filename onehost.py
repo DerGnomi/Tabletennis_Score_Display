@@ -83,12 +83,12 @@ def shiftout():
   #read the length of the bitstring
   i_len = len(bin(i_digit)[2:])
   #if 2 is at the end of the number, the last bit must be 0 but will be stripped of
-  #because it is at the beginning of the bitstring and will be stripped by convert it 
+  #because it is at the beginning of the bitstring and will be stripped by convert it
   #back to int from binary
   if get_sumled() == 2 or get_sumled() == 12 or get_sumled() == 22 or get_sumled() == 32 or get_sumled() == 42 or get_sumled() == 52 or get_sumled() == 62 or get_sumled() == 72 or get_sumled() == 82 or get_sumled() == 92:
     i_len += 1
   #if the string is shorter than 14 bits it must be filled with 0 at the end
-  #will also be dropped in the first step by convert from int to bit  
+  #will also be dropped in the first step by convert from int to bit
   if 14-i_len != 0:
     for i in range(14-i_len):
       s = b_digit + '0'
@@ -130,11 +130,29 @@ def set_sumled(su):
   #debug output
   if db == True:
     print ("Set new state")
+  #import the global var to set it
   global sumled
-  if not su == 404:
-    sumled += su
+  if su == 1:
+    if sumled > 18:
+      if not str(sumled)[-1] == 9:
+        sumled += 1
+    elif not sumled == 9:
+      sumled += 1
+  elif su == (-1):
+    if sumled > 9:
+      if not str(sumled)[-1] == 0:
+       sumled = sumled - 1
+    else:
+      sumled = sumled -1
+  elif su == 10:
+    if not sumled >= 90:
+      sumled = sumled + 10
+  elif su == (-10):
+    if not sumled < 10:
+      sumled = sumled - 10
   else:
     sumled = 0
+  #sumled += su
   #set sumled to 0 if its lower than 0 and bigger than 99
   #to avoid breaking the board
   if not ( 0 <= sumled <= 99):
