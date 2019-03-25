@@ -134,13 +134,13 @@ def set_sumled(su):
   global sumled
   if su == 1:
     if sumled > 18:
-      if not str(sumled)[-1:] == 9:
+      if not int(str(sumled)[-1:]) == 9:
         sumled += 1
     elif not sumled == 9:
       sumled += 1
   elif su == -1:
     if sumled >= 10:
-      if not str(sumled)[-1:] == 0:
+      if not int(str(sumled)[-1:]) == 0:
        sumled = sumled - 1
     else:
       sumled = sumled -1
