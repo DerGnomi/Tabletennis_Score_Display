@@ -8,7 +8,7 @@ from gpiozero.pins.pigpio import PiGPIOFactory
 #define local pinboard
 local_factory = PiGPIOFactory()
 #define remote pinoboard
-remote_factory = PiGPIOFactory(host='192.168.2.40')
+remote_factory = PiGPIOFactory(host='192.168.20.2')
 
 ###############
 # REMOTE PINS #
