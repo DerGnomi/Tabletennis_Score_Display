@@ -31,7 +31,7 @@ sudo raspi-config
 ### Insert the remote ip
 
 ```
-remote_factory = PiGPIOFactory(host='192.168.2.40')
+remote_factory = PiGPIOFactory(host='192.168.20.2')
 ```
 
 ## Connect the Pins and the input / output devices
@@ -44,7 +44,7 @@ remote_factory = PiGPIOFactory(host='192.168.2.40')
 * Button to decrease the right digit by 1 is PIN 23
 * Switch should be on PIN 26
 
-Connect the other side of the Button/Switch to Ground
+Connect the other side of the Buttons/Switch to Ground
 
 ### Remote device
 
@@ -57,6 +57,17 @@ Connect the other side of the Button/Switch to Ground
 
 If you want to use the controlling Pi as a portable device, just get a cheap Powerbank. 6000 mAh should be enough to control the board for longer than one day
 
+## Branches
+### arudino
+
+arduino branch holds the old arduino file, for the arduino i used
+
+### stash-files
+
+stash-files holds the stashed files
+
+* networkconfig and networkconfig move script
+* layout of the 7 segment display with decimal and binar numbers for each displayed number
 ## Q&A
 
 * If you got questions how to get this project to work, just leave me a message
